@@ -170,13 +170,13 @@ This resource has the following action:
 ### Attributes ###
 This resource has the following attributes:
 
-* `code` string, license code when adding a package. 24 or 48 uppercase alpha only characters.
+* `codes` Array, license code when adding a package. 24 or 48 uppercase alpha only characters.
 
 ### Example ###
 
 ````ruby
 netapp_feature 'iscsi' do
-  code 'ABCDEFGHIJKLMNOPQRSTUVWX'
+  codes ['ABCDEFGHIJKLMNOPQRSTUVWX']
   action :enable
 end
 ````
