@@ -24,12 +24,6 @@ action :create do
   raise ArgumentError, "Attribute home_port is required to create network interface" unless new_resource.home_port
   raise ArgumentError, "Attribute role is required to create network interface" unless new_resource.role
 
-  if new_resource.data_protocols
-    new_resource.data_protocols.each do |protocol|
-      raise ArgumentError, "Invalid protocol \"#{protocol}\". It must be nfs/cifs/iscsi/fcp/fcache/none" unless ["nfs", "cifs", "iscsi", "fcp", "fcache", "none"].include? protocol
-    end
-  end
-
   # Create API Request.
   netapp_lif_api = netapp_hash
 
@@ -45,7 +39,17 @@ action :create do
   netapp_lif_api[:api_attribute]["administrative-status"] = new_resource.administrative_status unless new_resource.administrative_status.nil?
   netapp_lif_api[:api_attribute]["comment"] = new_resource.comment unless new_resource.comment.nil?
   #Todo- verify
-  netapp_lif_api[:api_attribute]["data-protocols"] = new_resource.data_protocols unless new_resource.data_protocols.nil?
+  if new_resource.data_protocols
+    new_resource.data_protocols.each do |protocol|
+      raise ArgumentError, "Invalid protocol \"#{protocol}\". It must be nfs/cifs/iscsi/fcp/fcache/none" unless ["nfs", "cifs", "iscsi", "fcp", "fcache", "none"].include? protocol
+    end
+    if new_resource.data_protocols.length >= 2
+      if new_resource.data_protocols.include?('none') || new_resource.data_protocols.include?('iscsi') || new_resource.data_protocols.include?('fcp')
+        raise ArgumentError, "Invalid data_protocols; 'none', 'iscsi', or 'fcp' must be specified as the only protocol on the LIF."
+      end
+    end
+    netapp_lif_api[:api_attribute]["data-protocols"]["data-protocol"] = new_resource.data_protocols
+  end
   netapp_lif_api[:api_attribute]["failover-group"] = new_resource.failover_group unless new_resource.failover_group.nil?
   netapp_lif_api[:api_attribute]["failover-policy"] = new_resource.failover_policy unless new_resource.failover_policy.nil?
   netapp_lif_api[:api_attribute]["firewall-policy"] = new_resource.firewall_policy unless new_resource.firewall_policy.nil?
