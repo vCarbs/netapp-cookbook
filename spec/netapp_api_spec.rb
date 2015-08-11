@@ -8,13 +8,14 @@ class Netapp_Wrapper
 end
 
 describe 'create netapp connection' do
-  context 'when url is provided' do
+  context 'when url is provided with asup' do
     before do
       @netapp = Netapp_Wrapper.new
       @netapp.define_singleton_method(:node) do
         node = Hash.new
         node['netapp'] = {'url' => "http://root:secret@pfiler01.example.com/vfiler01" }
         node['netapp']['api'] = {'timeout' => 40000 }
+        node['netapp']['asup'] = true
         node
       end
       @server = double
@@ -45,7 +46,33 @@ describe 'create netapp connection' do
     end
   end
 
-  context 'when login credentials are passed separately' do
+  context 'when url is provided without asup' do
+    before do
+      @netapp = Netapp_Wrapper.new
+      @netapp.define_singleton_method(:node) do
+        node = Hash.new
+        node['netapp'] = {'url' => "http://root:secret@pfiler01.example.com/vfiler01" }
+        node['netapp']['api'] = {'timeout' => 40000 }
+        node['netapp']['asup'] = false
+        node
+      end
+      @server = double
+
+    end
+    it 'connects to netapp server' do
+      expect(NaServer).to receive(:new).with("pfiler01.example.com",1,13).and_return(@server)
+      expect(@server).to receive(:set_application_name).with("Chef")
+      expect(@server).to receive(:set_admin_user).with("root", "secret")
+      expect(@server).to receive(:set_transport_type).with("HTTP")
+      expect(@server).to receive(:set_port).with(80)
+      expect(@server).to receive(:set_vfiler).with("vfiler01")
+      expect(@server).to receive(:set_timeout).with(40000)
+
+      @netapp.connect
+    end
+  end
+
+  context 'when login credentials are passed separately without asup' do
     before do
       @netapp = Netapp_Wrapper.new
       @netapp.define_singleton_method(:node) do
@@ -55,6 +82,39 @@ describe 'create netapp connection' do
         node['netapp']['password'] = "secret"
         node['netapp']['fqdn'] = "pfiler01.example.com"
         node['netapp']['https'] = true
+        node['netapp']['asup'] = false
+        node['netapp']['vserver'] = "vfiler01"
+        node['netapp']['api'] = {'timeout' => 40000}
+        node
+      end
+      @server = double
+
+    end
+    it 'connects to netapp server' do
+      expect(NaServer).to receive(:new).with("pfiler01.example.com",1,13).and_return(@server)
+      expect(@server).to receive(:set_application_name).with("Chef")
+      expect(@server).to receive(:set_admin_user).with("root", "secret")
+      expect(@server).to receive(:set_transport_type).with("HTTPS")
+      expect(@server).to receive(:set_port).with(443)
+      expect(@server).to receive(:set_vfiler).with("vfiler01")
+      expect(@server).to receive(:set_timeout).with(40000)
+      expect(@server).to receive(:get_transport_type).and_return("HTTPS")
+      expect(@server).to receive(:get_port).and_return(443)
+
+      @netapp.connect
+    end
+  end
+  context 'when login credentials are passed separately with asup' do
+    before do
+      @netapp = Netapp_Wrapper.new
+      @netapp.define_singleton_method(:node) do
+        node =  Hash.new
+        node['netapp'] = Hash.new
+        node['netapp']['user'] = "root"
+        node['netapp']['password'] = "secret"
+        node['netapp']['fqdn'] = "pfiler01.example.com"
+        node['netapp']['https'] = true
+        node['netapp']['asup'] = true
         node['netapp']['vserver'] = "vfiler01"
         node['netapp']['api'] = {'timeout' => 40000}
         node

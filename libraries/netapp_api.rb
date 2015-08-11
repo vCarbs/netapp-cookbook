@@ -48,7 +48,9 @@ module NetApp
         redacted_url = "#{@server.get_transport_type().downcase}://#{node['netapp']['fqdn']}:#{@server.get_port()}/#{node['netapp']['vserver'] if node['netapp']['vserver']}"
       end
 
-      send_asup(redacted_url)
+      if node['netapp']['asup'] == true
+        send_asup(redacted_url)
+      end
 
       @server
     end

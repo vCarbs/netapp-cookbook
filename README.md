@@ -31,6 +31,9 @@ or
     ['netapp']['password'] string
     ['netapp']['fqdn'] string
     ['netapp']['vserver'] string
+    ['netapp']['asup'] boolean, default is 'true'.
+
+The ASUP option, if set to 'true', will cause a log message to be sent to the storage cluster. This log message will be included in ASUP bundles that are sent back to NetApp, if configured to do so on the system. If ASUP is not enabled on the system or on the attribute listed above, no log message will be sent to NetApp.
 
 NetApp Resources
 ================
