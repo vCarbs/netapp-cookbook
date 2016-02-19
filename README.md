@@ -3,13 +3,13 @@ NetApp Cookbook
 
 The NetApp cookbook manages Clustered Data ONTAP clusters using the NetApp Manageability SDK. Both cluster-wide and Storage Virtual Machine (SVM, formerly known as Vservers) specific operations are supported.
 
-The NetApp cookbook resources can be used to manage Cloud ONTAP instances in Amazon Web Services.
+The NetApp cookbook may also be used to manage the `netapp_role`, `netapp_volume`, and `netapp_qtree` resources on Cloud ONTAP on Amazon Web Services.
 
 Requirements
 ------------
 #### NetApp Manageability SDK Library v5.0
 
-You can download it from [NetApp](http://mysupport.netapp.com/NOW/cgi-bin/software?product=NetApp+Manageability+SDK&platform=All+Platforms) after you have created an account on [NetApp NOW](https://support.netapp.com/eservice/public/now.do)
+You may download it from [NetApp](http://mysupport.netapp.com/NOW/cgi-bin/software?product=NetApp+Manageability+SDK&platform=All+Platforms) after you have created an account on [NetApp NOW](https://support.netapp.com/eservice/public/now.do)
 
 - Save the NetApp SDK to this NetApp cookbook in the "libraries" dir.
 
@@ -129,7 +129,7 @@ netapp_role
 -----------
 Cluster management of role creation, modification and deletion.
 
-netapp_role resource can be used to manage roles on the Cloud ONTAP instances as well. 
+The `netapp_role` resource may be used to manage roles on Cloud ONTAP instances as well.
 
 ### Actions ###
 This resource has the following actions:
@@ -230,7 +230,7 @@ netapp_volume
 -------------
 SVM-management of volume creation, modification and deletion including auto-increment, snapshot schedules and volume options.
 
-netapp_volume resource provisions additional volume on the Cloud ONTAP instances. It Creates the volume on an existing aggregate that has sufficient free space.
+The `netapp_volume` resource provisions additional volumes on Cloud ONTAP instances. It Creates the volume on an existing aggregate that has sufficient free space.
 
 ### Actions ###
 This resource has the following actions:
@@ -385,7 +385,7 @@ netapp_qtree
 ------------
 SVM-management of qtree creation, modification and deletion. Qtrees are a special subdirectory of the root of a volume that acts as a virtual subvolume with special attributes.
 
-netapp_qtree resource can be used to create logically defined file system on Cloud ONTAP instances.
+The `netapp_qtree` resource may be used to create logically defined file system on Cloud ONTAP instances.
 
 ### Actions ###
 This resource has the following actions:
