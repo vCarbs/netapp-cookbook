@@ -9,3 +9,4 @@
 # default[:netapp][:password] = 'secret'
 # default[:netapp][:fqdn] = 'pfiler01.example.com'
 # default[:netapp][:vserver] = 'vfiler01'
+# default[:netapp][:asup] = true

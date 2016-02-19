@@ -8,19 +8,60 @@ class Netapp_Wrapper
 end
 
 describe 'create netapp connection' do
-  context 'when url is provided' do
+  context 'when url is provided with asup' do
     before do
       @netapp = Netapp_Wrapper.new
       @netapp.define_singleton_method(:node) do
         node = Hash.new
         node['netapp'] = {'url' => "http://root:secret@pfiler01.example.com/vfiler01" }
         node['netapp']['api'] = {'timeout' => 40000 }
+        node['netapp']['asup'] = true
         node
       end
       @server = double
+
+      @api_hash = Hash.new{|h,k| h[k] = Hash.new(&h.default_proc)}
+      @api_hash[:api_name] = "ems-autosupport-log"
+      @api_hash[:api_attribute]["computer-name"] = nil
+      @api_hash[:api_attribute]["event-id"] = "0"
+      @api_hash[:api_attribute]["event-source"] = "Chef::NetApp"
+      @api_hash[:api_attribute]["app-version"] = Chef::VERSION
+      @api_hash[:api_attribute]["category"] = "provisioning"
+      @api_hash[:api_attribute]["event-description"] = "Chef::NetApp managed http://pfiler01.example.com:80/vfiler01"
+      @api_hash[:api_attribute]["log-level"] = "6"
+      @api_hash[:api_attribute]["auto-support"] = "false"
+
     end
     it 'connects to netapp server' do
       expect(NaServer).to receive(:new).with("pfiler01.example.com",1,13).and_return(@server)
+      expect(@server).to receive(:set_application_name).with("Chef")
+      expect(@server).to receive(:set_admin_user).with("root", "secret")
+      expect(@server).to receive(:set_transport_type).with("HTTP")
+      expect(@server).to receive(:set_port).with(80)
+      expect(@server).to receive(:set_vfiler).with("vfiler01")
+      expect(@server).to receive(:set_timeout).with(40000)
+      expect(@netapp).to receive(:invoke).with(@api_hash)
+
+      @netapp.connect
+    end
+  end
+
+  context 'when url is provided without asup' do
+    before do
+      @netapp = Netapp_Wrapper.new
+      @netapp.define_singleton_method(:node) do
+        node = Hash.new
+        node['netapp'] = {'url' => "http://root:secret@pfiler01.example.com/vfiler01" }
+        node['netapp']['api'] = {'timeout' => 40000 }
+        node['netapp']['asup'] = false
+        node
+      end
+      @server = double
+
+    end
+    it 'connects to netapp server' do
+      expect(NaServer).to receive(:new).with("pfiler01.example.com",1,13).and_return(@server)
+      expect(@server).to receive(:set_application_name).with("Chef")
       expect(@server).to receive(:set_admin_user).with("root", "secret")
       expect(@server).to receive(:set_transport_type).with("HTTP")
       expect(@server).to receive(:set_port).with(80)
@@ -31,7 +72,7 @@ describe 'create netapp connection' do
     end
   end
 
-  context 'when login credentials are passed separately' do
+  context 'when login credentials are passed separately without asup' do
     before do
       @netapp = Netapp_Wrapper.new
       @netapp.define_singleton_method(:node) do
@@ -41,19 +82,68 @@ describe 'create netapp connection' do
         node['netapp']['password'] = "secret"
         node['netapp']['fqdn'] = "pfiler01.example.com"
         node['netapp']['https'] = true
+        node['netapp']['asup'] = false
         node['netapp']['vserver'] = "vfiler01"
         node['netapp']['api'] = {'timeout' => 40000}
         node
       end
       @server = double
+
     end
     it 'connects to netapp server' do
       expect(NaServer).to receive(:new).with("pfiler01.example.com",1,13).and_return(@server)
+      expect(@server).to receive(:set_application_name).with("Chef")
       expect(@server).to receive(:set_admin_user).with("root", "secret")
       expect(@server).to receive(:set_transport_type).with("HTTPS")
       expect(@server).to receive(:set_port).with(443)
       expect(@server).to receive(:set_vfiler).with("vfiler01")
       expect(@server).to receive(:set_timeout).with(40000)
+      expect(@server).to receive(:get_transport_type).and_return("HTTPS")
+      expect(@server).to receive(:get_port).and_return(443)
+
+      @netapp.connect
+    end
+  end
+  context 'when login credentials are passed separately with asup' do
+    before do
+      @netapp = Netapp_Wrapper.new
+      @netapp.define_singleton_method(:node) do
+        node =  Hash.new
+        node['netapp'] = Hash.new
+        node['netapp']['user'] = "root"
+        node['netapp']['password'] = "secret"
+        node['netapp']['fqdn'] = "pfiler01.example.com"
+        node['netapp']['https'] = true
+        node['netapp']['asup'] = true
+        node['netapp']['vserver'] = "vfiler01"
+        node['netapp']['api'] = {'timeout' => 40000}
+        node
+      end
+      @server = double
+
+      @api_hash = Hash.new{|h,k| h[k] = Hash.new(&h.default_proc)}
+      @api_hash[:api_name] = "ems-autosupport-log"
+      @api_hash[:api_attribute]["computer-name"] = nil
+      @api_hash[:api_attribute]["event-id"] = "0"
+      @api_hash[:api_attribute]["event-source"] = "Chef::NetApp"
+      @api_hash[:api_attribute]["app-version"] = Chef::VERSION
+      @api_hash[:api_attribute]["category"] = "provisioning"
+      @api_hash[:api_attribute]["event-description"] = "Chef::NetApp managed https://pfiler01.example.com:443/vfiler01"
+      @api_hash[:api_attribute]["log-level"] = "6"
+      @api_hash[:api_attribute]["auto-support"] = "false"
+
+    end
+    it 'connects to netapp server' do
+      expect(NaServer).to receive(:new).with("pfiler01.example.com",1,13).and_return(@server)
+      expect(@server).to receive(:set_application_name).with("Chef")
+      expect(@server).to receive(:set_admin_user).with("root", "secret")
+      expect(@server).to receive(:set_transport_type).with("HTTPS")
+      expect(@server).to receive(:set_port).with(443)
+      expect(@server).to receive(:set_vfiler).with("vfiler01")
+      expect(@server).to receive(:set_timeout).with(40000)
+      expect(@server).to receive(:get_transport_type).and_return("HTTPS")
+      expect(@server).to receive(:get_port).and_return(443)
+      expect(@netapp).to receive(:invoke).with(@api_hash)
 
       @netapp.connect
     end
