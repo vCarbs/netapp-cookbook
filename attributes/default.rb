@@ -10,3 +10,4 @@
 # default[:netapp][:fqdn] = 'pfiler01.example.com'
 # default[:netapp][:vserver] = 'vfiler01'
 # default[:netapp][:asup] = true
+# default[:netapp][:api][:timeout] = 999
